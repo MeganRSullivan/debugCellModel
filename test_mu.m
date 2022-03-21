@@ -1,37 +1,31 @@
-% testing that growth rates are equal in the cell model
+% script to test if growth rates from biosynthesis, photosynthesis, and nutrient uptake are equal in the cell model
 % runs CellCNPcopy
 
 %% load data
 load('Cellmodel_input_obs.mat')
 
-% need d0 function
-% addpath('/Users/megansullivan/Documents/UC Irvine/GitHub/WeiLei_code/my_func')
-
 spd  = 24*60^2 ;  	% seconds per day
 spa  = 365*spd ;  	% seconds per year
 
-par.po4obs = obs.po4;
-par.no3obs = obs.no3 ;
-par.Temp = obs.temp ;
-par.PARobs = obs.PAR ;
-par.M3d_EZ = obs.wetpoints ;
-iprod = obs.iEuphotic ;
-grid.xt = obs.gridx ;
-grid.yt = obs.gridy ;
+par.po4obs = obs.po4; 	% [mmol/m^3]
+par.no3obs = obs.no3 ;  % [mmol/m^3]
+par.Temp = obs.temp ;	% [deg C]
+par.PARobs = obs.PAR ;	% [umol photon m^-2 s^-1]
+par.M3d_EZ = obs.wetpoints ; %logical matrix of wet points; [lat x lon x depth]
+iprod = obs.iEuphotic ; % indeces of wet points in euphotic zone
+grid.xt = obs.gridx ;	% longitude vector
+grid.yt = obs.gridy ;	% latitude vector
 
 lon = grid.xt;
 lat = grid.yt;
 
-P0 = inputs.P ;
-N0 = inputs.N ;
-T0 = inputs.T ;
-Irr0 = inputs.PAR ;
-
-M3d_EZ = obs.wetpoints;
+P0 = inputs.P ;  % vector; converted to [mol/L]
+N0 = inputs.N ;	 % vector; converted to [mol/L]
+T0 = inputs.T ;	 % vector
+Irr0 = inputs.PAR ;	% vector
 
 %% Set up
 % will need the function "PackPar" on your path
-% addpath('/Users/megansullivan/Documents/UC Irvine/GitHub/OCIM-BGC-Cell')
 
 on = true; off = false;
 
@@ -39,10 +33,10 @@ par.optim   = on ;
 par.Cmodel  = off ;
 par.Omodel  = off ;
 par.Simodel = off ;
-par.Cellmodel = on; % cellular trait model for phyto uptake stoichiometry
-par.LoadOpt = off ; % if load optimial par.
-par.pscale  = 0.0 ;
-par.cscale  = 0.25 ; % factor to weigh DOC in the objective function
+par.Cellmodel = on;  % cellular trait model for phyto uptake stoichiometry
+par.LoadOpt = off ;  % if load optimial par.
+par.pscale  = 0.0 ;  % factor to weigh DOC in the objective function (not used in cell model)
+par.cscale  = 0.25 ; % factor to weigh DOC in the objective function (not used in cell model)
 
 % P model parameters
 par.opt_sigma = off ;
@@ -155,7 +149,7 @@ clear xhat
 par = PackPar(par)
 x0 = par.p0;
 
-%% remove the density conversion (WOA data multiplied by permil in preprocessing stage)
+%% optional: remove the density conversion (WOA data originally in umol/kg and multiplied by permil in preprocessing stage)
 % rho   = 1024.5       ; % seawater density [kg/m^3];
 % permil    = rho*1e-3 ; % density*[1mmol/10^3 umol]; used for conversion from umol/kg to mmol/m3;
 % P0 = P0/permil;
@@ -167,7 +161,6 @@ x=x0;
 fprintf('done  \n')
 % differences from CellCNP:
 % multiplies aP and aN by 1000
-% change muP to include fProtAOpt
 
 % mu, radius, C2P seem reasonable. but now the entire ocean is N-Limited.
 %% 
